@@ -15,13 +15,17 @@ contract YourCollectible is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable 
         return "https://ipfs.io/ipfs/";
     }
 
-    function mintItem(address to, string memory uri) public returns (uint256) {
-        tokenIdCounter++;
-        uint256 tokenId = tokenIdCounter;
-        _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-        return tokenId;
-    }
+function mintItem(address to, string memory uri) public payable returns (uint256) {
+    uint256 price = 0.01 ether;
+    require(msg.value >= price, "Not enough ETH sent");
+
+    tokenIdCounter++;
+    uint256 tokenId = tokenIdCounter;
+    _safeMint(to, tokenId);
+    _setTokenURI(tokenId, uri);
+    return tokenId;
+}
+
 
     // Override functions from OpenZeppelin ERC721, ERC721Enumerable and ERC721URIStorage
 

@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { MyHoldings } from "./_components";
 import type { NextPage } from "next";
+import { parseEther } from "viem";
 import { useAccount } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
@@ -10,9 +12,17 @@ import { addToIPFS } from "~~/utils/simpleNFT/ipfs-fetch";
 import nftsMetadata from "~~/utils/simpleNFT/nftsMetadata";
 
 const MyNFTs: NextPage = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { address: connectedAddress, isConnected, isConnecting } = useAccount();
 
-  const { writeContractAsync } = useScaffoldWriteContract({ contractName: "YourCollectible" });
+  const { writeContractAsync } = useScaffoldWriteContract({
+    contractName: "YourCollectible",
+  });
 
   const { data: tokenIdCounter } = useScaffoldReadContract({
     contractName: "YourCollectible",
@@ -21,22 +31,23 @@ const MyNFTs: NextPage = () => {
   });
 
   const handleMintItem = async () => {
-    // circle back to the zero item if we've reached the end of the array
     if (tokenIdCounter === undefined) return;
 
     const tokenIdCounterNumber = Number(tokenIdCounter);
     const currentTokenMetaData = nftsMetadata[tokenIdCounterNumber % nftsMetadata.length];
     const notificationId = notification.loading("Uploading to IPFS");
+
     try {
       const uploadedItem = await addToIPFS(currentTokenMetaData);
 
-      // First remove previous loading notification and then show success notification
+      // Remove previous loading notification and show success
       notification.remove(notificationId);
       notification.success("Metadata uploaded to IPFS");
 
       await writeContractAsync({
         functionName: "mintItem",
         args: [connectedAddress, uploadedItem.path],
+        value: parseEther("0.01"), // Enviar 0.01 ETH al contrato
       });
     } catch (error) {
       notification.remove(notificationId);
@@ -53,15 +64,17 @@ const MyNFTs: NextPage = () => {
           </h1>
         </div>
       </div>
+
       <div className="flex justify-center">
-        {!isConnected || isConnecting ? (
+        {!isMounted ? null : !isConnected || isConnecting ? (
           <RainbowKitCustomConnectButton />
         ) : (
           <button className="btn btn-secondary" onClick={handleMintItem}>
-            Mint NFT
+            Mint Nft PAME
           </button>
         )}
       </div>
+
       <MyHoldings />
     </>
   );
