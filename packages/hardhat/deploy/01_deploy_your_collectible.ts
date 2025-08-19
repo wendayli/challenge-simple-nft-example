@@ -7,6 +7,7 @@ import { Contract } from "ethers";
  * constructor arguments set to the deployer address
  *
  * @param hre HardhatRuntimeEnvironment object.
+ *
  */
 const deployYourCollectible: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
@@ -33,7 +34,7 @@ const deployYourCollectible: DeployFunction = async function (hre: HardhatRuntim
   });
 
   // Get the deployed contract to interact with it after deploying.
-  const yourCollectible = await hre.ethers.getContract<Contract>("YourCollectible", deployer);
+  await hre.ethers.getContract<Contract>("YourCollectible", deployer);
 };
 
 export default deployYourCollectible;
